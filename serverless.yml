@@ -1,0 +1,15 @@
+service: serverless-tesseract # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: eu-west-1
+
+plugins:
+  - serverless-offline-python
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http: POST run
