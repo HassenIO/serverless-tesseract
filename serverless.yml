@@ -1,15 +1,31 @@
-service: serverless-tesseract # NOTE: update this with your service name
-
-provider:
-  name: aws
-  runtime: python3.6
-  region: eu-west-1
+service: serverless-tesseract
 
 plugins:
   - serverless-offline-python
 
+provider:
+  name: aws
+  runtime: python3.6
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+      Resource: 'arn:aws:s3:::${self:custom.s3Bucket}/*'
+
+custom:
+  s3Bucket: w-afa-${self:provider.stage}-plateforme-ia-tesseract-aas
+
 functions:
-  hello:
-    handler: handler.hello
+  process:
+    handler: process.run
     events:
-      - http: POST run
+      - s3:
+          bucket: ${self:custom.s3Bucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix:
+              - .png
+              - .jpg
